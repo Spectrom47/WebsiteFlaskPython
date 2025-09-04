@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Portfolio{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-['Roboto']" data-theme="default">
+
+
+    
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md fixed w-full top-0 left-0 z-50">
+        <div class="container mx-auto flex justify-between items-center py-4 px-6">
+            <div class="text-xl font-bold">
+                <a href="{{ url_for('home') }}">MyPortfolio</a>
+            </div>
+            <ul class="flex space-x-6">
+                <li><a href="{{ url_for('home') }}" class="hover:text-blue-500">Home</a></li>
+                <li><a href="{{ url_for('projects') }}" class="hover:text-blue-500">Projects</a></li>
+                <li><a href="{{ url_for('about') }}" class="hover:text-blue-500">About</a></li>
+                <li><a href="{{ url_for('contact') }}" class="hover:text-blue-500">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Admin Overlay -->
+<!-- Admin Overlay -->
+<div id="adminOverlay" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+    <div class="bg-gray-800 p-8 rounded-lg w-96 text-white">
+        <h2 class="text-2xl font-bold mb-4">Admin Login</h2>
+        <input type="password" id="adminPassword" placeholder="Enter password"
+               class="w-full p-2 mb-4 rounded text-black">
+        <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 p-2 rounded font-bold mb-4">Login</button>
+
+        <div id="adminLinks" class="hidden mt-4">
+            <h3 class="text-xl font-semibold mb-2">Hot Access Pages</h3>
+            <ul class="space-y-2">
+                <li><a href="{{ url_for('home') }}" class="hover:underline">Home</a></li>
+                <li><a href="{{ url_for('projects') }}" class="hover:underline">Projects</a></li>
+                <li><a href="{{ url_for('about') }}" class="hover:underline">About</a></li>
+                <li><a href="{{ url_for('contact') }}" class="hover:underline">Contact</a></li>
+            </ul>
+
+            <!-- Theme Changer -->
+            <div class="mt-4">
+                <h3 class="text-lg font-semibold mb-2">Themes</h3>
+                <button class="themeBtn w-full mb-2 p-2 rounded bg-gray-600 hover:bg-gray-700" data-theme="default">Default</button>
+                <button class="themeBtn w-full mb-2 p-2 rounded bg-purple-600 hover:bg-purple-700" data-theme="purple">Purple</button>
+                <button class="themeBtn w-full mb-2 p-2 rounded bg-green-600 hover:bg-green-700" data-theme="green">Green</button>
+                <button class="themeBtn w-full mb-2 p-2 rounded bg-yellow-500 hover:bg-yellow-600" data-theme="yellow">Yellow</button>
+            </div>
+
+            <button id="logoutBtn" class="w-full mt-4 bg-red-600 hover:bg-red-700 p-2 rounded font-bold">Logout</button>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- Main Content -->
+    <main class="pt-20 container mx-auto px-6">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white shadow-inner mt-10 py-6 text-center">
+        <p>&copy; {{ current_year }} MyPortfolio. All rights reserved.</p>
+    </footer>
+
+</body>
+
+<script>
+const overlay = document.getElementById('adminOverlay');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const adminLinks = document.getElementById('adminLinks');
+const adminPasswordInput = document.getElementById('adminPassword');
+const themeButtons = document.querySelectorAll('.themeBtn');
+
+const ADMIN_PASSWORD = "secret123"; // Change this to your password
+let isLoggedIn = false;
+
+// Open overlay on Shift + Q (ignore if typing)
+document.addEventListener('keydown', (e) => {
+    if (document.activeElement !== adminPasswordInput && e.shiftKey && e.code === "KeyQ") {
+        e.preventDefault();
+        overlay.classList.remove('hidden');
+        adminPasswordInput.value = '';
+        adminPasswordInput.focus();
+    }
+});
+
+// Login
+loginBtn.addEventListener('click', () => {
+    if (adminPasswordInput.value === ADMIN_PASSWORD) {
+        isLoggedIn = true;
+        adminPasswordInput.classList.add('hidden');
+        loginBtn.classList.add('hidden');
+        adminLinks.classList.remove('hidden');
+        sessionStorage.setItem('adminLoggedIn', 'true');
+    } else {
+        alert("Incorrect password!");
+    }
+});
+
+// Logout
+logoutBtn.addEventListener('click', () => {
+    isLoggedIn = false;
+    adminPasswordInput.value = '';
+    adminPasswordInput.classList.remove('hidden');
+    loginBtn.classList.remove('hidden');
+    adminLinks.classList.add('hidden');
+    overlay.classList.add('hidden');
+    sessionStorage.removeItem('adminLoggedIn');
+});
+
+// Theme changer
+themeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        applyTheme(theme);
+        localStorage.setItem('savedTheme', theme); // Save theme
+    });
+});
+
+// Apply theme function
+function applyTheme(theme) {
+    switch(theme) {
+        case "default":
+            document.body.style.backgroundColor = "#f3f4f6";
+            document.body.style.backgroundImage = "";
+            document.body.dataset.theme = "default";
+            break;
+        case "purple":
+            document.body.style.backgroundColor = "#7e22ce";
+            document.body.style.backgroundImage = "";
+            document.body.dataset.theme = "purple";
+            break;
+        case "green":
+            document.body.style.backgroundColor = "#16a34a";
+            document.body.style.backgroundImage = "";
+            document.body.dataset.theme = "green";
+            break;
+        case "yellow":
+            document.body.style.backgroundColor = "#facc15";
+            document.body.style.backgroundImage = "";
+            document.body.dataset.theme = "yellow";
+            break;
+        // You can add more themes or wallpapers here
+    }
+}
+
+// Remember login and theme across pages
+window.addEventListener('load', () => {
+    // Login
+    if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+        isLoggedIn = true;
+        adminPasswordInput.classList.add('hidden');
+        loginBtn.classList.add('hidden');
+        adminLinks.classList.remove('hidden');
+    }
+
+    // Theme
+    const savedTheme = localStorage.getItem('savedTheme') || 'default';
+    applyTheme(savedTheme);
+});
+
+// Close overlay if clicked outside panel
+overlay.addEventListener('click', (e) => {
+    if (e.target === overlay && !isLoggedIn) {
+        overlay.classList.add('hidden');
+    }
+});
+</script>
+
+
+
+</html>

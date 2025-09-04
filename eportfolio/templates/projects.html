@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<h1 class="text-4xl font-bold mb-6 text-center">My Projects</h1>
+
+<!-- Tabs -->
+<div class="mb-4 flex justify-center space-x-4">
+    <button class="tab-btn px-4 py-2 bg-red-600 text-white rounded" data-tab="website">Website Development</button>
+    <button class="tab-btn px-4 py-2 bg-red-100 text-red-800 rounded" data-tab="roblox">Roblox Development</button>
+    <button class="tab-btn px-4 py-2 bg-red-100 text-red-800 rounded" data-tab="content">Content Development</button>
+    <button class="tab-btn px-4 py-2 bg-red-100 text-red-800 rounded" data-tab="misc">Misc. Development</button>
+</div>
+
+<!-- Tab Contents -->
+<div class="overflow-y-auto max-h-[70vh] p-4 grid gap-6">
+    {% for tab, images in {'website': website, 'roblox': roblox, 'content': content, 'misc': misc}.items() %}
+    <div class="tab-content {% if tab != 'website' %}hidden{% endif %} grid place-items-center gap-4">
+        {% if images %}
+            {% if images is string %}
+                <!-- Single image -->
+                <img src="{{ url_for('static', filename=images) }}" 
+                     class="w-full max-w-sm h-auto object-cover rounded-lg shadow-lg cursor-pointer"
+                     onclick="openLightbox('{{ url_for('static', filename=images) }}')"
+                     alt="{{ tab|capitalize }} Project">
+            {% else %}
+                <!-- Multiple images -->
+                {% for img in images %}
+                <img src="{{ url_for('static', filename=img) }}" 
+                     class="w-full max-w-sm h-auto object-cover rounded-lg shadow-lg cursor-pointer"
+                     onclick="openLightbox('{{ url_for('static', filename=img) }}')"
+                     alt="{{ tab|capitalize }} Project">
+                {% endfor %}
+            {% endif %}
+        {% else %}
+            <p class="text-gray-400 italic">Expected: no {{ tab|capitalize }} project — nil confirmed</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50">
+    <img id="lightbox-img" src="" alt="Project Full View" class="max-w-[90%] max-h-[90%] rounded-lg shadow-lg">
+    <button onclick="closeLightbox()" class="absolute top-5 right-5 text-white text-3xl font-bold hover:text-gray-300">&times;</button>
+</div>
+
+<script>
+/* LIGHTBOX */
+function openLightbox(src) {
+    const lightbox = document.getElementById('lightbox');
+    const img = document.getElementById('lightbox-img');
+    img.src = src;
+    lightbox.classList.remove('hidden');
+}
+function closeLightbox() {
+    document.getElementById('lightbox').classList.add('hidden');
+}
+document.getElementById('lightbox').addEventListener('click', e => {
+    if(e.target.id === 'lightbox') closeLightbox();
+});
+
+/* TAB SWITCHING */
+const tabButtons = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+
+tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const targetTab = btn.dataset.tab.toLowerCase();
+
+        // Reset all buttons
+        tabButtons.forEach(b => {
+            b.classList.remove('bg-red-600','text-white');
+            b.classList.add('bg-red-100','text-red-800');
+        });
+
+        // Hide all tab contents
+        tabContents.forEach(tc => tc.classList.add('hidden'));
+
+        // Activate clicked button
+        btn.classList.add('bg-red-600','text-white');
+        btn.classList.remove('bg-red-100','text-red-800');
+
+        // Show correct tab content
+        tabContents.forEach(tc => {
+            const imgs = tc.querySelectorAll('img');
+            if(imgs.length > 0 && imgs[0].alt.toLowerCase().startsWith(targetTab)) {
+                tc.classList.remove('hidden');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

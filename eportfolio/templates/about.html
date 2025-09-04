@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}About Me{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row lg:gap-8 p-6">
+
+<!-- About Section -->
+<div class="flex-1 bg-white rounded-xl shadow-lg p-6 mb-6 lg:mb-0 hover:shadow-xl transition-shadow duration-300 flex flex-col lg:flex-row gap-6 items-center">
+  
+  <!-- Profile Imaged --> 
+  <div class="flex-shrink-0">
+    <img src="{{ url_for('static', filename='images/profile.png') }}" 
+         alt="Spectrom" 
+         class="w-40 h-40 rounded-full object-cover shadow-lg hover:scale-105 transition-transform duration-300">
+  </div>
+  
+  <!-- About Text -->
+  <div class="flex-1">
+    <h1 class="text-4xl font-bold mb-5 text-blue-600">My Biography Tab</h1>
+    <p class="mb-3 text-gray-700 leading-relaxed">
+      Hello there! My name is <strong>Spectrom</strong>, an online software developer. I started my journey in 2011 and have been steadily building my skills ever since. My current level ranges from avid to intermediate, and my goal is to become a top-tier front-end / full-stack developer!
+    </p>
+    <p class="mb-3 text-gray-700 leading-relaxed">
+      I have also been studying computer hardware since 2011 and continue to expand my knowledge in tech.
+    </p>
+    <p class="mb-3 text-gray-700 leading-relaxed">
+      Certified in Python (Mimo, 2023), I have a solid foundation in programming and practical experience.
+    </p>
+    <p class="text-gray-700 leading-relaxed">
+      I started school at Ivy Tech in 2021 and am excited to complete my last semester to achieve my degree!
+    </p>
+  </div>
+</div>
+
+
+  <!-- Comments Section -->
+  <div class="w-full lg:w-96 bg-gray-50 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+    <h2 class="text-2xl font-semibold mb-4 text-blue-600">Comments</h2>
+
+    <!-- Comment Form -->
+    <form id="commentForm" class="flex flex-col gap-3 mb-4">
+      <input 
+        type="text" 
+        id="commentInput" 
+        placeholder="Write a comment..." 
+        class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
+      >
+      <button 
+        type="submit" 
+        class="w-full py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200"
+      >
+        Post
+      </button>
+    </form>
+
+    <!-- Comments List -->
+    <ul id="commentList" class="space-y-3">
+      {% for comment in comments %}
+      <li class="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center hover:bg-gray-50 transition-colors duration-200">
+        <span class="text-gray-800">{{ comment.text }}</span>
+        <div class="flex items-center gap-2">
+          <button class="likeBtn text-gray-500 hover:text-red-500" data-id="{{ comment.id }}">👍</button>
+          <span class="likeCount text-gray-600">{{ comment.likes }}</span>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>
+
+<script>
+const commentForm = document.getElementById('commentForm');
+const commentInput = document.getElementById('commentInput');
+const commentList = document.getElementById('commentList');
+
+function createCommentElement(comment) {
+  const li = document.createElement('li');
+  li.className = 'bg-white p-4 rounded-lg shadow-sm flex justify-between items-center hover:bg-gray-50 transition-colors duration-200';
+
+  const span = document.createElement('span');
+  span.textContent = comment.text;
+  span.className = 'text-gray-800';
+
+  const likeContainer = document.createElement('div');
+  likeContainer.className = 'flex items-center gap-2';
+
+  const likeBtn = document.createElement('button');
+  likeBtn.className = 'likeBtn text-gray-500 hover:text-red-500';
+  likeBtn.innerHTML = '👍';
+  likeBtn.dataset.id = comment.id;
+
+  const likeCount = document.createElement('span');
+  likeCount.textContent = comment.likes;
+  likeCount.className = 'text-gray-600';
+
+  likeBtn.addEventListener('click', async () => {
+    const response = await fetch('/like_comment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: comment.id })
+    });
+    const data = await response.json();
+    likeCount.textContent = data.likes;
+  });
+
+  likeContainer.append(likeBtn, likeCount);
+  li.append(span, likeContainer);
+  return li;
+}
+
+commentForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const text = commentInput.value.trim();
+  if (!text) return;
+
+  const response = await fetch('/add_comment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text })
+  });
+  const data = await response.json();
+
+  const commentItem = createCommentElement(data);
+  commentList.appendChild(commentItem);
+  commentInput.value = '';
+});
+
+document.querySelectorAll('.likeBtn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    const countSpan = btn.nextElementSibling;
+    const response = await fetch('/like_comment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const data = await response.json();
+    countSpan.textContent = data.likes;
+  });
+});
+</script>
+{% endblock %}

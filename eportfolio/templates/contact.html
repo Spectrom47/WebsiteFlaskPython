@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Contact{% endblock %}
+
+{% block content %}
+<!-- Starry background container -->
+<div class="relative z-10 max-w-2xl mx-auto text-center space-y-6">
+    
+    <!-- Example image -->
+    <img src="{{ url_for('static', filename='images/avatar.png') }}" 
+         alt="My Avatar" 
+         class="mx-auto w-32 h-32 rounded-full border-4 border-white shadow-lg">
+
+    <h1 class="text-4xl font-bold mb-6">Contact Me</h1>
+
+    <p class="text-lg">Email: <a href="mailto:finalstandcommunity2025@gmail.com" class="text-blue-400 hover:underline">finalstandcommunity2025@gmail.com</a></p>
+    
+    <p class="text-lg">
+        Discord: <a href="https://discord.gg/nwMNPgXWGG" target="_blank" class="text-blue-400 hover:underline">Join Server</a>
+    </p>
+
+    <p class="text-lg">
+        Fiverr: <a href="https://www.fiverr.com/isaahraleigh" target="_blank" class="text-blue-400 hover:underline">My Fiverr Profile</a>
+    </p>
+
+    <p class="text-lg">
+        Github: <a href="https://github.com/Spectrom47" target="_blank" class="text-blue-400 hover:underline">My GitHub</a>
+    </p>
+</div>
+
+
+<!-- Starry background JS -->
+<script>
+const canvas = document.getElementById("stars");
+const ctx = canvas.getContext("2d");
+
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+const stars = [];
+const numStars = 150;
+
+function random(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+// Initialize stars
+for (let i = 0; i < numStars; i++) {
+    stars.push({
+        x: random(0, width),
+        y: random(0, height),
+        r: random(0.5, 1.5),
+        d: random(0.5, 1.5)
+    });
+}
+
+// Draw stars
+function draw() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    for (let i = 0; i < numStars; i++) {
+        const s = stars[i];
+        ctx.moveTo(s.x, s.y);
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2, true);
+    }
+    ctx.fill();
+    moveStars();
+}
+
+// Animate stars
+let angle = 0;
+function moveStars() {
+    angle += 0.01;
+    for (let i = 0; i < numStars; i++) {
+        const s = stars[i];
+        s.y += Math.cos(angle + s.d) + 0.1;
+        s.x += Math.sin(angle) * 0.5;
+
+        if(s.x > width) s.x = 0;
+        if(s.x < 0) s.x = width;
+        if(s.y > height) s.y = 0;
+    }
+}
+
+function animate() {
+    draw();
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+// Resize
+window.addEventListener("resize", () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+});
+</script>
+{% endblock %}
